@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- General Settings -->
+        <arg name="package_name"            value="robot_spawn"/>
+        
+        <!-- Robot Settings -->
+        <arg name="robot_namespace"         default="asd"/>
+        <arg name="robot_type"              default="irb6660" />
+        <arg name="robot_support_path"      default="abb_irb6660_support" />
+        <arg name="robot_eoat"              default="true" />
+        <arg name="robot_parallel_linkage"  default="true"/>
+
+        <!-- Global Parameters -->
+        <arg name="robot_description"   value="robot_description"/> <!-- The parameter-name under which the URDF is loaded -->
+        <arg name="dollar"              value="$" />
+        <arg name="package_path"        value="(find $(arg package_name))"/>
+        
+        <!-- RVIZ Config -->
+        <arg name="joint_gui"           default="true" />   
+        <arg name="rviz_config"         default="$(arg dollar)$(arg package_path)/config/demo_rviz_settings.rviz" />
+    
+    <!-- ############################## -->
+    <!--    Parameter Configuration     -->
+    <!-- ############################## -->
+
+        <!-- Check for empty robot-namespace. If not add an "_" to the robot-prefix -->
+        <arg if="$(eval robot_namespace != '')" name="robot_prefix" value="$(arg robot_namespace)_" />
+        <arg if="$(eval robot_namespace == '')" name="robot_prefix" value="$(arg robot_namespace)" />
+
+    <!-- ############################## -->
+    <!--    Parameter Loading Section   -->
+    <!-- ############################## -->
+
+        <!-- Load universal robot description format (URDF) -->
+        <param name="$(arg robot_description)" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_urdf.xacro' 
+                        robot_prefix:=$(arg robot_prefix)
+                        robot_type:=$(arg robot_type)
+                        robot_eoat:=$(arg robot_eoat)"/>
+
+        <!-- The semantic description that corresponds to the URDF -->
+        <param name="$(arg robot_description)_semantic" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_srdf.xacro' 
+                        robot_prefix:=$(arg robot_prefix)
+                        robot_type:=$(arg robot_type)"/>
+
+        <!-- Robot Prefix and Planning Parameters -->
+        <include file="$(find robot_support)/launch/planning_context.launch" >
+            <arg name="robot_prefix"        value="$(arg robot_prefix)" />
+            <arg name="robot_type"          value="$(arg robot_type)" />
+            <arg name="robot_support_path"  value="$(arg robot_support_path)" />
+        </include>
+
+    <!-- ############################## -->
+    <!--        Move-It & RVIZ          -->
+    <!-- ############################## -->
+
+        <!-- Publish Joint-States -->
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" unless="$(arg joint_gui)">
+            <rosparam param="source_list" > [robot/controller_joint_states] </rosparam>
+        </node>
+
+        <node name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" if="$(arg joint_gui)">
+            <rosparam param="source_list" > [robot/controller_joint_states] </rosparam>
+        </node>
+
+        <!-- Publish Joint-States -->
+        <!-- <node name="joint_state_pub" pkg="robotics_support" type="joint_state_publisher_node"/> -->
+
+        <!-- Publish the Robot State (TF transforms) -->
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+        <!-- Rviz -->
+        <include file="$(find robotics_support)/launch/moveit_rviz.launch">
+            <arg name="rviz_config"     value="-d $(arg rviz_config)" />
+        </include>
+
+</launch>

@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- General Settings -->
+        <arg name="package_name"                value="multi_robot_spawn"/>
+        <arg name="global_ref_frame"            value="world"/>
+        
+        <!-- Robot Settings -->
+            <!-- Robot #1 -->
+            <arg name="robot1_namespace"         default="robot1"/>
+            <arg name="robot1_type"              default="irb6660" />
+            <arg name="robot1_eoat"              default="true" />
+            <arg name="robot1_support_path"      default="abb_irb6660_support" />
+            <arg name="robot1_parallel_linkage"  default="true"/>
+
+            <!-- Robot #2 -->
+            <arg name="robot2_namespace"         default="robot2"/>
+            <arg name="robot2_type"              default="gp400" />
+            <arg name="robot2_eoat"              default="false" />
+            <arg name="robot2_support_path"      default="motoman_gp400_support" />
+            <arg name="robot2_parallel_linkage"  default="true"/>
+
+        <!-- Global Parameters -->
+        <arg name="robot_description"   value="robot_description"/> <!-- The parameter-name under which the URDF is loaded -->
+        <arg name="dollar"              value="$" />
+        <arg name="package_path"        value="(find $(arg package_name))"/>
+        
+        <!-- RVIZ Config -->
+        <arg name="joint_gui"           default="true" />   
+        <arg name="rviz_config"         default="$(arg dollar)$(arg package_path)/config/demo_rviz_settings.rviz" />
+
+    <!-- ############################## -->
+    <!--    Parameter Configuration     -->
+    <!-- ############################## -->
+
+        <!-- Check for empty robot-namespace. If not add an "_" to the robot-prefix -->
+        <arg if="$(eval robot1_namespace != '')" name="robot1_prefix" value="$(arg robot1_namespace)_" />
+        <arg if="$(eval robot1_namespace == '')" name="robot1_prefix" value="$(arg robot1_namespace)" />
+
+        <arg if="$(eval robot2_namespace != '')" name="robot2_prefix" value="$(arg robot2_namespace)_" />
+        <arg if="$(eval robot2_namespace == '')" name="robot2_prefix" value="$(arg robot2_namespace)" />
+    
+    <!-- ############################## -->
+    <!--    Parameter Loading Section   -->
+    <!-- ############################## -->
+        
+        <!-- Load universal robot description format (URDF) -->
+        <param name="$(arg robot_description)" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_urdf.xacro' 
+                        robot1_prefix:=$(arg robot1_prefix)
+                        robot1_type:=$(arg robot1_type)
+                        robot1_eoat:=$(arg robot1_eoat)
+                        robot2_prefix:=$(arg robot2_prefix)
+                        robot2_type:=$(arg robot2_type)
+                        robot2_eoat:=$(arg robot2_eoat)"/>
+
+        <!-- The semantic description that corresponds to the URDF -->
+        <param name="$(arg robot_description)_semantic" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_srdf.xacro' 
+                        robot1_prefix:=$(arg robot1_prefix)
+                        robot1_type:=$(arg robot1_type)
+                        robot2_prefix:=$(arg robot2_prefix)
+                        robot2_type:=$(arg robot2_type)"/>
+
+        <!-- Robot #1 -->
+        <!-- Robot Prefix and Planning Parameters -->
+        <include file="$(find robot_support)/launch/planning_context.launch" >
+            <arg name="robot_prefix"        value="$(arg robot1_prefix)" />
+            <arg name="robot_type"          value="$(arg robot1_type)" />
+            <arg name="robot_support_path"  value="$(arg robot1_support_path)" />
+        </include>
+
+        <!-- Robot #2 -->
+        <!-- Robot Prefix and Planning Parameters -->
+        <include file="$(find robot_support)/launch/planning_context.launch" >
+            <arg name="robot_prefix"        value="$(arg robot2_prefix)" />
+            <arg name="robot_type"          value="$(arg robot2_type)" />
+            <arg name="robot_support_path"  value="$(arg robot2_support_path)" />
+        </include>
+
+    <!-- ############################## -->
+    <!--        Move-It & RVIZ          -->
+    <!-- ############################## -->
+
+        <!-- Publish Joint-States -->
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" unless="$(arg joint_gui)">
+            <rosparam param="source_list" > [robot/controller_joint_states] </rosparam>
+        </node>
+
+        <node name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" if="$(arg joint_gui)">
+            <rosparam param="source_list" > [robot/controller_joint_states] </rosparam>
+        </node>
+
+        <!-- Publish Joint-States -->
+        <!-- <node name="joint_state_pub" pkg="robotics_support" type="joint_state_publisher_node"/> -->
+
+        <!-- Publish the Robot State (TF transforms) -->
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+        <!-- Rviz -->
+        <include file="$(find robotics_support)/launch/moveit_rviz.launch">
+            <arg name="rviz_config"     value="-d $(arg rviz_config)" />
+        </include>
+
+</launch>

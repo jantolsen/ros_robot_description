@@ -2,33 +2,47 @@
 <launch>
     
     <!-- General Settings -->
+        <arg name="package_name"            value="robot_spawn"/>
+        <arg name="global_ref_frame"        value="world"/>
 
         <!-- Robot Settings -->
         <arg name="robot_namespace"         default=""/>
         <arg name="robot_type"              default="gp400" />
-        <arg name="robot_eoat"              default="true" />
         <arg name="robot_support_path"      default="motoman_gp400_support" />
+        <arg name="robot_eoat"              default="true" />
         <arg name="robot_parallel_linkage"  default="true"/>
 
         <!-- Global Parameters -->
-        <arg name="robot_description" value="robot_description"/>     <!-- The parameter-name under which the URDF is loaded -->
+        <arg name="robot_description"   value="robot_description"/> <!-- The parameter-name under which the URDF is loaded -->
+        <arg name="dollar"              value="$" />
+        <arg name="package_path"        value="(find $(arg package_name))"/>
         
         <!-- RVIZ Config -->
-        <arg name="joint_gui"       default="true" />   
-        <arg name="rviz_config"     default="$(find robot_spawn)/config/demo_rviz_settings.rviz" />
+        <arg name="joint_gui"           default="true" />   
+        <arg name="rviz_config"         default="$(arg dollar)$(arg package_path)/config/demo_rviz_settings.rviz" />
     
     <!-- ############################## -->
-    <!--        Robot - IRB6660         -->
+    <!--    Parameter Loading Section   -->
     <!-- ############################## -->
 
-        <!-- Planning Context -->
-        <!-- (Loading of URDF, SRDF, and Robot Prefix Parameters) -->
+        <!-- Load universal robot description format (URDF) -->
+        <param name="$(arg robot_description)" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_urdf.xacro' 
+                        robot_prefix:=$(arg robot_namespace)
+                        robot_type:=$(arg robot_type)
+                        robot_eoat:=$(arg robot_eoat)"/>
+
+        <!-- The semantic description that corresponds to the URDF -->
+        <param name="$(arg robot_description)_semantic" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_srdf.xacro' 
+                        robot_prefix:=$(arg robot_namespace)
+                        robot_type:=$(arg robot_type)"/>
+
+        <!-- Robot Prefix and Planning Parameters -->
         <include file="$(find robot_support)/launch/planning_context.launch" >
             <arg name="robot_prefix"        value="$(arg robot_namespace)" />
             <arg name="robot_type"          value="$(arg robot_type)" />
-            <arg name="robot_eoat"          value="$(arg robot_eoat)" />
             <arg name="robot_support_path"  value="$(arg robot_support_path)" />
-            <arg name="robot_description"   value="$(arg robot_description)" />
         </include>
 
     <!-- ############################## -->
