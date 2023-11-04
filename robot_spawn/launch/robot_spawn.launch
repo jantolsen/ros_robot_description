@@ -8,8 +8,8 @@
         <!-- Robot Settings -->
         <arg name="robot_simulation"        default="$(arg sim)"/>  
         <arg name="robot_ip"                default="192.168.1.1"   unless="$(arg robot_simulation)"/>
-        <arg name="robot_namespace"         default="robot"/>            <!-- Remember to update "system_settings.yaml" -->                                   
-        <arg name="robot_type"              default="irb6660" />    <!-- Remember to update "system_settings.yaml" -->        
+        <arg name="robot_namespace"         default=""/>                                <!-- Remember to update "system_settings.yaml" -->                                   
+        <arg name="robot_type"              default="irb6660" />                        <!-- Remember to update "system_settings.yaml" -->        
         <arg name="robot_support_path"      default="abb_irb6660_support" />
         <arg name="robot_eoat"              default="true" />
         <arg name="robot_parallel_linkage"  default="true"/>

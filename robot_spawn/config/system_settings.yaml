@@ -5,11 +5,8 @@
 
 # ----- General ----- #
 general:
-  # robot_count: 1
-  robot_prefix:
-    robot_1:  ""
-
   simulation:           true      # Simulation mode [enable/disable]
+  # robot_count:          1
   global_frame:         "world"   # Global reference frame
   kinematics: 
     solver:             "KDL"     # Kinematic-solver [KDL, OPW, TRACIK, LMA, CACHED_KDL, CACHED_TRACIK]
@@ -19,7 +16,7 @@ general:
 
 # ----- Robot ----- #    
 robot:    
-  prefix:           "robot"            # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
+  prefix:           ""            # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
   type:             "irb6660"     # Robot-type [GP400, GP215, IRB6660] (needs to match parameter in main launch-file)
   planning_group:                 # Planning-groups for the robot (needs to match parameter in SRDF of robot-type)
     - manipulator   
