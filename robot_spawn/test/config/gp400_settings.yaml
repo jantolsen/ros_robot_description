@@ -8,7 +8,7 @@ general:
   simulation:           true      # Simulation mode [enable/disable]
   global_frame:         "world"   # Global reference frame
   kinematics: 
-    solver:             "OPW"     # Kinematic-solver [KDL, OPW, TRACIK, LMA, CACHED_KDL, CACHED_TRACIK]
+    solver:             "LMA"     # Kinematic-solver [KDL, OPW, TRACIK, LMA, CACHED_KDL, CACHED_TRACIK]
     search_resolution:  0.005
     timeout:            0.005
     attempts:           5
