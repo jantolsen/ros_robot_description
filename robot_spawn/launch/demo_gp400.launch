@@ -59,13 +59,13 @@
         </node>
 
         <!-- Publish Joint-States -->
-        <!-- <node name="joint_state_pub" pkg="robotics_support" type="joint_state_publisher_node"/> -->
+        <!-- <node name="joint_state_pub" pkg="robot_support" type="joint_state_publisher_node"/> -->
 
         <!-- Publish the Robot State (TF transforms) -->
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
         <!-- Rviz -->
-        <include file="$(find robotics_support)/launch/moveit_rviz.launch">
+        <include file="$(find robot_support)/launch/moveit_rviz.launch">
             <arg name="rviz_config"     value="-d $(arg rviz_config)" />
         </include>
 

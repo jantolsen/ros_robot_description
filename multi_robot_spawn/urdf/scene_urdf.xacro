@@ -62,10 +62,10 @@
         <!-- No EOAT, add default TCP -->
         <xacro:unless value="${robot1_eoat}">
             <!-- Robot Tool-Center-Point -->
-            <link name="$(arg robot1_prefix)tcp"/>
-            <joint name="$(arg robot1_prefix)tcp_joint" type="fixed">
+            <link name="$(arg robot1_prefix)eoat_tcp"/>
+            <joint name="$(arg robot1_prefix)eoat_tcp_joint" type="fixed">
                 <parent link="$(arg robot1_prefix)tool0"/>
-                <child link="$(arg robot1_prefix)tcp"/>
+                <child link="$(arg robot1_prefix)eoat_tcp"/>
                 <origin xyz="0.000 0.000 0.000" rpy="0.0 0.0 0.0"/>
             </joint>
         </xacro:unless>
@@ -129,10 +129,10 @@
         <!-- No EOAT, add default TCP -->
         <xacro:unless value="${robot2_eoat}">
             <!-- Robot Tool-Center-Point -->
-            <link name="$(arg robot2_prefix)tcp"/>
-            <joint name="$(arg robot2_prefix)tcp_joint" type="fixed">
+            <link name="$(arg robot2_prefix)eoat_tcp"/>
+            <joint name="$(arg robot2_prefix)eoat_tcp_joint" type="fixed">
                 <parent link="$(arg robot2_prefix)tool0"/>
-                <child link="$(arg robot2_prefix)tcp"/>
+                <child link="$(arg robot2_prefix)eoat_tcp"/>
                 <origin xyz="0.000 0.000 0.000" rpy="0.0 0.0 0.0"/>
             </joint>
         </xacro:unless>

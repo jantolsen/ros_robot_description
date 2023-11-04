@@ -47,10 +47,10 @@
     <!-- No EOAT, add default TCP -->
     <xacro:unless value="${robot_eoat}">
         <!-- Robot Tool-Center-Point -->
-        <link name="$(arg robot_prefix)tcp"/>
-        <joint name="$(arg robot_prefix)tcp_joint" type="fixed">
+        <link name="$(arg robot_prefix)eoat_tcp"/>
+        <joint name="$(arg robot_prefix)eoat_tcp_joint" type="fixed">
             <parent link="$(arg robot_prefix)tool0"/>
-            <child link="$(arg robot_prefix)tcp"/>
+            <child link="$(arg robot_prefix)eoat_tcp"/>
             <origin xyz="0.000 0.000 0.000" rpy="0.0 0.0 0.0"/>
         </joint>
     </xacro:unless>
@@ -63,6 +63,6 @@
         <link name="$(arg global_ref_frame)"/>
 
         <!-- Environment URDF -->
-        <!-- <xacro:include filename="$(find robot_support)/urdf/environment_urdf.xacro"/> -->
+        <xacro:include filename="$(find robot_support)/urdf/environment_urdf.xacro"/>
         
 </robot>
