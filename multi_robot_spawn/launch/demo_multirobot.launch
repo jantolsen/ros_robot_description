@@ -3,7 +3,6 @@
 
     <!-- General Settings -->
         <arg name="package_name"                value="multi_robot_spawn"/>
-        <arg name="global_ref_frame"            value="world"/>
         
         <!-- Robot Settings -->
             <!-- Robot #1 -->

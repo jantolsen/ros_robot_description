@@ -14,7 +14,7 @@
         <xacro:arg name="robot1_eoat"       default="false"/>
 
         <xacro:arg name="robot1_ref_link"  default="$(arg global_ref_frame)" />
-        <xacro:arg name="robot1_ref_xyz"   default="0.000 0.000 0.000"/>
+        <xacro:arg name="robot1_ref_xyz"   default="0.000 2.500 0.000"/>
         <xacro:arg name="robot1_ref_rpy"   default="${radians(0.00)} ${radians(0.00)} ${radians(0.00)}"/>
 
         <!-- Properties -->
@@ -81,7 +81,7 @@
         <xacro:arg name="robot2_eoat"       default="false"/>
 
         <xacro:arg name="robot2_ref_link"  default="$(arg global_ref_frame)" />
-        <xacro:arg name="robot2_ref_xyz"   default="0.000 0.000 0.000"/>
+        <xacro:arg name="robot2_ref_xyz"   default="0.000 -2.500 0.000"/>
         <xacro:arg name="robot2_ref_rpy"   default="${radians(0.00)} ${radians(0.00)} ${radians(0.00)}"/>
 
         <!-- Properties -->
@@ -145,6 +145,6 @@
         <link name="$(arg global_ref_frame)"/>
 
         <!-- Environment URDF -->
-        <!-- <xacro:include filename="$(find robot_support)/urdf/environment_urdf.xacro"/> -->
+        <xacro:include filename="$(find robot_support)/urdf/environment_urdf.xacro"/>
         
 </robot>

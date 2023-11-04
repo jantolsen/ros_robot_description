@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- General Settings -->
+        <arg name="sim"                     default="true"/>
+        <arg name="package_name"            value="multi_robot_spawn"/>
+        
+        <!-- Robot Settings -->
+            <!-- Robot #1 -->
+            <arg name="robot1_simulation"        default="$(arg sim)"/>  
+            <arg name="robot1_ip"                default="192.168.1.1"   unless="$(arg robot1_simulation)"/>
+            <arg name="robot1_namespace"         default="robot1"/>
+            <arg name="robot1_type"              default="irb6660" />                   <!-- Remember to update "system_settings.yaml" -->
+            <arg name="robot1_support_path"      default="abb_irb6660_support" />       <!-- Remember to update "system_settings.yaml" -->
+            <arg name="robot1_eoat"              default="true" />                      
+            <arg name="robot1_parallel_linkage"  default="true"/>
+
+            <!-- Robot #2 -->
+            <arg name="robot2_simulation"        default="$(arg sim)"/>  
+            <arg name="robot2_ip"                default="192.168.1.1"   unless="$(arg robot2_simulation)"/>
+            <arg name="robot2_namespace"         default="robot2"/>                     <!-- Remember to update "system_settings.yaml" -->
+            <arg name="robot2_type"              default="gp400" />                     <!-- Remember to update "system_settings.yaml" -->
+            <arg name="robot2_support_path"      default="motoman_gp400_support" />
+            <arg name="robot2_eoat"              default="false" />
+            <arg name="robot2_parallel_linkage"  default="true"/>
+
+        <!-- Global Parameters -->
+        <arg name="robot_description"                   value="robot_description"/>     <!-- The parameter-name under which the URDF is loaded -->
+        <arg name="controller_manager"                  value="simple"/>                <!-- MoveIt Controller Manager (simple, ros_control, ros_multi_control)-->
+        <arg name="planning_pipeline"                   value="ompl"/>                  <!-- Select Planning Pipeline (CHOMP, OMPL, PILZ) -->
+        <arg name="publish_monitored_planning_scene"    value="true"/>                  <!-- MoveIt Planning Execution Argument -->
+        <arg name="allow_trajectory_execution"          value="true"/>
+        <arg name="fake_execution"                      value="false"/>                 <!-- Fake execution controllers -->
+        <arg name="execution_type"                      value="interpolate" />          <!-- Set execution mode for fake execution controllers -->
+        <arg name="dollar"                              value="$" />
+        <arg name="package_path"                        value="(find $(arg package_name))"/>
+        
+        <!-- RVIZ Config -->
+        <arg name="joint_gui"           default="false" />   
+        <arg name="rviz_config"         default="$(arg dollar)$(arg package_path)/config/rviz_settings.rviz" />
+
+        <!-- Debug Parameters -->
+        <arg name="debug"           default="false"/>
+        <arg unless="$(arg debug)"  name="debug_config" value="" />
+        <arg if=    "$(arg debug)"  name="debug_config" value="xterm -e gdb --ex run --args" />
+    
+    <!-- ############################## -->
+    <!--    Parameter Loading Section   -->
+    <!-- ############################## -->
+
+        <!-- System Settings -->
+        <!-- (Load global settings and parameters of system to parameter server) -->
+        <rosparam command="load" file="$(arg dollar)$(arg package_path)/config/system_settings.yaml" />
+
+        <!-- Robot #1 -->
+        <!-- Robot Prefix and Planning Parameters -->
+        <include file="$(find robot_support)/launch/planning_context.launch" >
+            <arg name="robot_prefix"        value="$(arg robot1_namespace)" />
+            <arg name="robot_type"          value="$(arg robot1_type)" />
+            <arg name="robot_support_path"  value="$(arg robot1_support_path)" />
+        </include>
+
+        <!-- Robot #2 -->
+        <!-- Robot Prefix and Planning Parameters -->
+        <include file="$(find robot_support)/launch/planning_context.launch" >
+            <arg name="robot_prefix"        value="$(arg robot2_namespace)" />
+            <arg name="robot_type"          value="$(arg robot2_type)" />
+            <arg name="robot_support_path"  value="$(arg robot2_support_path)" />
+        </include>
+
+        <!-- Check for empty robot-namespace. If not add an "_" to the robot-prefix -->
+        <arg if="$(eval robot1_namespace != '')" name="robot1_scene_prefix" value="$(arg robot1_namespace)_" />
+        <arg if="$(eval robot1_namespace == '')" name="robot1_scene_prefix" value="$(arg robot1_namespace)" />
+
+        <arg if="$(eval robot2_namespace != '')" name="robot2_scene_prefix" value="$(arg robot2_namespace)_" />
+        <arg if="$(eval robot2_namespace == '')" name="robot2_scene_prefix" value="$(arg robot2_namespace)" />
+
+        <!-- Load universal robot description format (URDF) -->
+        <param name="$(arg robot_description)" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_urdf.xacro' 
+                        robot1_prefix:=$(arg robot1_scene_prefix)
+                        robot1_type:=$(arg robot1_type)
+                        robot1_eoat:=$(arg robot1_eoat)
+                        robot2_prefix:=$(arg robot2_scene_prefix)
+                        robot2_type:=$(arg robot2_type)
+                        robot2_eoat:=$(arg robot2_eoat)"/>
+
+        <!-- The semantic description that corresponds to the URDF -->
+        <param name="$(arg robot_description)_semantic" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_srdf_test2.xacro' 
+                        "/>
+
+    <!-- ############################## -->
+    <!--            Robot #1            -->
+    <!-- ############################## -->
+        
+        <!-- Robot #1 - Node Group -->
+        <group ns="$(arg robot1_namespace)">
+            <!-- Simulated Robot -->
+            <group if="$(arg robot1_simulation)">
+                <!-- Remapping of Joint-State and -Info -->
+                <remap from="joint_states"  to="controller_joint_states"/>
+                <remap from="joint_info"    to="controller_joint_info"/>
+                
+                <!-- Run the Robot Simulation and Action Interface Nodes -->
+                <node pkg="industrial_robot_simulator" type="industrial_robot_simulator" name="industrial_robot_simulator"/>
+                <node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action"/>
+            </group>
+
+            <!-- Real/Physical Robot -->
+            <group unless="$(arg robot1_simulation)">
+                <!-- Remapping of Joint-State and -Info -->
+                <remap from="$(arg robot_prefix)/$(arg robot1_type)_controller/joint_states" to="controller_joint_states"/>
+                <remap from="$(arg robot_prefix)/$(arg robot1_type)_controller/feedback_states" to="feedback_states"/>
+
+                <!-- Find the related launch file to route to the correct Robot-Controller-Driver -->
+                <include file="$(find robot_support)/launch/robot_controller_driver/$(arg robot1_type)_driver.launch">
+                    <arg name="robot_ip"            value="$(arg robot_ip)" />
+                    <arg name="parallel_linkage"    value="$(arg robot_parallel_linkage)" />
+                </include>
+            </group>
+        </group>
+        <!-- Robot #1 - Node Group -->
+
+        <!-- Robot #2 - Node Group -->
+        <group ns="$(arg robot2_namespace)">
+            <!-- Simulated Robot -->
+            <group if="$(arg robot2_simulation)">
+                <!-- Remapping of Joint-State and -Info -->
+                <remap from="joint_states"  to="controller_joint_states"/>
+                <remap from="joint_info"    to="controller_joint_info"/>
+                
+                <!-- Run the Robot Simulation and Action Interface Nodes -->
+                <node pkg="industrial_robot_simulator" type="industrial_robot_simulator" name="industrial_robot_simulator"/>
+                <node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action"/>
+            </group>
+
+            <!-- Real/Physical Robot -->
+            <group unless="$(arg robot2_simulation)">
+                <!-- Remapping of Joint-State and -Info -->
+                <remap from="$(arg robot_prefix)/$(arg robot2_type)_controller/joint_states" to="controller_joint_states"/>
+                <remap from="$(arg robot_prefix)/$(arg robot2_type)_controller/feedback_states" to="feedback_states"/>
+
+                <!-- Find the related launch file to route to the correct Robot-Controller-Driver -->
+                <include file="$(find robot_support)/launch/robot_controller_driver/$(arg robot2_type)_driver.launch">
+                    <arg name="robot_ip"            value="$(arg robot_ip)" />
+                    <arg name="parallel_linkage"    value="$(arg robot_parallel_linkage)" />
+                </include>
+            </group>
+        </group>
+        <!-- Robot #2 - Node Group -->
+
+        
+    <!-- ############################## -->
+    <!--        Move-It & RVIZ          -->
+    <!-- ############################## -->
+
+        <!-- Publish Joint-States -->
+        <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" unless="$(arg joint_gui)">
+            <rosparam param="source_list" > [/controller_joint_states] </rosparam>
+        </node> -->
+
+        <!-- <node name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" if="$(arg joint_gui)">
+            <rosparam param="source_list" > [robot/controller_joint_states] </rosparam>
+        </node> -->
+
+        <!-- Publish Joint-States -->
+        <node name="joint_state_pub" pkg="robot_support" type="joint_state_publisher_node"/>
+
+        <!-- Publish the Robot State (TF transforms) -->
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+        <!-- Move Group -->
+        <include file="$(find robot_support)/launch/move_group.launch">
+            <arg name="controller_manager"                  value="$(arg controller_manager)"/>
+            <arg name="debug"                               value="$(arg debug)"/>
+            <arg name="pipeline"                            value="$(arg planning_pipeline)" />
+            <arg name="publish_monitored_planning_scene"    value="$(arg publish_monitored_planning_scene)" />
+            <arg name="allow_trajectory_execution"          value="$(arg allow_trajectory_execution)"/>
+            <arg name="fake_execution"                      value="$(arg fake_execution)"/>
+            <arg name="execution_type"                      value="$(arg execution_type)"/>
+        </include>
+
+        <!-- Rviz -->
+        <include file="$(find robot_support)/launch/moveit_rviz.launch">
+            <arg name="rviz_config"     value="-d $(arg rviz_config)" />
+        </include>
+
+</launch>
