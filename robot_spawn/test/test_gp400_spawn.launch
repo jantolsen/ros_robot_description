@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- General Settings -->
+        <arg name="sim"                     default="true"/>
+        <arg name="package_name"            value="robot_spawn"/>
+        
+        <!-- Robot Settings -->
+        <arg name="robot_simulation"        default="$(arg sim)"/>  
+        <arg name="robot_ip"                default="192.168.1.1"   unless="$(arg robot_simulation)"/>
+        <arg name="robot_namespace"         default="robot_gp400"/>                     <!-- Remember to update "system_settings.yaml" -->                                   
+        <arg name="robot_type"              default="gp400" />                          <!-- Remember to update "system_settings.yaml" -->       
+        <arg name="robot_support_path"      default="motoman_gp400_support" />
+        <arg name="robot_eoat"              default="true" />
+        <arg name="robot_parallel_linkage"  default="true"/>
+
+        <!-- Global Parameters -->
+        <arg name="robot_description"                   value="robot_description"/>     <!-- The parameter-name under which the URDF is loaded -->
+        <arg name="controller_manager"                  value="simple"/>                <!-- MoveIt Controller Manager (simple, ros_control, ros_multi_control)-->
+        <arg name="planning_pipeline"                   value="ompl"/>                  <!-- Select Planning Pipeline (CHOMP, OMPL, PILZ) -->
+        <arg name="publish_monitored_planning_scene"    value="true"/>                  <!-- MoveIt Planning Execution Argument -->
+        <arg name="allow_trajectory_execution"          value="true"/>
+        <arg name="fake_execution"                      value="false"/>                 <!-- Fake execution controllers -->
+        <arg name="execution_type"                      value="interpolate" />          <!-- Set execution mode for fake execution controllers -->
+        <arg name="dollar"                              value="$" />
+        <arg name="package_path"                        value="(find $(arg package_name))"/>
+        
+        <!-- RVIZ Config -->
+        <arg name="joint_gui"           default="false" />   
+        <arg name="rviz_config"         default="$(arg dollar)$(arg package_path)/test/config/rviz_settings.rviz" />
+
+        <!-- Debug Parameters -->
+        <arg name="debug"           default="false"/>
+        <arg unless="$(arg debug)"  name="debug_config" value="" />
+        <arg if=    "$(arg debug)"  name="debug_config" value="xterm -e gdb --ex run --args" />
+    
+    <!-- ############################## -->
+    <!--    Parameter Loading Section   -->
+    <!-- ############################## -->
+
+        <!-- System Settings -->
+        <!-- (Load global settings and parameters of system to parameter server) -->
+        <rosparam command="load" file="$(arg dollar)$(arg package_path)/test/config/gp400_settings.yaml" />
+
+        <!-- Robot Prefix and Planning Parameters -->
+        <include file="$(find robot_support)/launch/planning_context.launch" >
+            <arg name="robot_prefix"        value="$(arg robot_namespace)" />
+            <arg name="robot_type"          value="$(arg robot_type)" />
+            <arg name="robot_support_path"  value="$(arg robot_support_path)" />
+        </include>
+
+        <!-- Check for empty robot-namespace. If not add an "_" to the robot-prefix -->
+        <arg if="$(eval robot_namespace != '')" name="robot_scene_prefix" value="$(arg robot_namespace)_" />
+        <arg if="$(eval robot_namespace == '')" name="robot_scene_prefix" value="$(arg robot_namespace)" />
+
+        <!-- Load universal robot description format (URDF) -->
+        <param name="$(arg robot_description)" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/test/urdf/scene_urdf.xacro' 
+                        robot_prefix:=$(arg robot_scene_prefix)
+                        robot_type:=$(arg robot_type)
+                        robot_eoat:=$(arg robot_eoat)"/>
+
+        <!-- The semantic description that corresponds to the URDF -->
+        <param name="$(arg robot_description)_semantic" 
+                command="xacro --inorder '$(arg dollar)$(arg package_path)/test/urdf/scene_srdf.xacro' 
+                        robot_prefix:=$(arg robot_scene_prefix)
+                        robot_type:=$(arg robot_type)"/>
+
+    <!-- ############################## -->
+    <!--              Robot             -->
+    <!-- ############################## -->
+        
+        <!-- Robot - Node Group -->
+        <group if="$(eval robot_namespace != '')" 
+                ns="$(arg robot_namespace)">
+            <!-- Simulated Robot -->
+            <group if="$(arg robot_simulation)">
+                <!-- Remapping of Joint-State and -Info -->
+                <remap from="joint_states"  to="controller_joint_states"/>
+                <remap from="joint_info"    to="controller_joint_info"/>
+                
+                <!-- Run the Robot Simulation and Action Interface Nodes -->
+                <node pkg="industrial_robot_simulator" type="industrial_robot_simulator" name="industrial_robot_simulator"/>
+                <node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action"/>
+            </group>
+
+            <!-- Real/Physical Robot -->
+            <group unless="$(arg robot_simulation)">
+                <!-- Remapping of Joint-State and -Info -->
+                <remap from="$(arg robot_prefix)/$(arg robot_type)_controller/joint_states" to="controller_joint_states"/>
+                <remap from="$(arg robot_prefix)/$(arg robot_type)_controller/feedback_states" to="feedback_states"/>
+
+                <!-- Find the related launch file to route to the correct Robot-Controller-Driver -->
+                <include file="$(find robot_support)/launch/robot_controller_driver/$(arg robot_type)_driver.launch">
+                    <arg name="robot_ip"            value="$(arg robot_ip)" />
+                    <arg name="parallel_linkage"    value="$(arg robot_parallel_linkage)" />
+                </include>
+            </group>
+        </group>
+        <!-- Robot - Node Group --> 
+
+        <!-- Robot - without Node Group -->
+        <group if="$(eval robot_namespace == '')">
+            <!-- Simulated Robot -->
+            <group if="$(arg robot_simulation)">
+                <!-- Remapping of Joint-State and -Info -->
+                <remap from="joint_states"  to="controller_joint_states"/>
+                <remap from="joint_info"    to="controller_joint_info"/>
+                
+                <!-- Run the Robot Simulation and Action Interface Nodes -->
+                <node pkg="industrial_robot_simulator" type="industrial_robot_simulator" name="industrial_robot_simulator"/>
+                <node pkg="industrial_robot_client" type="joint_trajectory_action" name="joint_trajectory_action"/>
+            </group>
+
+            <!-- Real/Physical Robot -->
+            <group unless="$(arg robot_simulation)">
+                <!-- Remapping of Joint-State and -Info -->
+                <remap from="$(arg robot_prefix)/$(arg robot_type)_controller/joint_states" to="controller_joint_states"/>
+                <remap from="$(arg robot_prefix)/$(arg robot_type)_controller/feedback_states" to="feedback_states"/>
+
+                <!-- Find the related launch file to route to the correct Robot-Controller-Driver -->
+                <include file="$(find robot_support)/launch/robot_controller_driver/$(arg robot_type)_driver.launch">
+                    <arg name="robot_ip"            value="$(arg robot_ip)" />
+                    <arg name="parallel_linkage"    value="$(arg robot_parallel_linkage)" />
+                </include>
+            </group>
+        </group>
+        <!-- Robot - without Node Group --> 
+
+    <!-- ############################## -->
+    <!--        Move-It & RVIZ          -->
+    <!-- ############################## -->
+
+        <!-- Publish Joint-States -->
+        <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" unless="$(arg joint_gui)">
+            <rosparam param="source_list" > [/controller_joint_states] </rosparam>
+        </node> -->
+
+        <!-- <node name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" if="$(arg joint_gui)">
+            <rosparam param="source_list" > [robot/controller_joint_states] </rosparam>
+        </node> -->
+
+        <!-- Publish Joint-States -->
+        <node name="joint_state_pub" pkg="robot_support" type="joint_state_publisher_node"/>
+
+        <!-- Publish the Robot State (TF transforms) -->
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+        <!-- Move Group -->
+        <include file="$(find robot_support)/launch/move_group.launch">
+            <arg name="controller_manager"                  value="$(arg controller_manager)"/>
+            <arg name="debug"                               value="$(arg debug)"/>
+            <arg name="pipeline"                            value="$(arg planning_pipeline)" />
+            <arg name="publish_monitored_planning_scene"    value="$(arg publish_monitored_planning_scene)" />
+            <arg name="allow_trajectory_execution"          value="$(arg allow_trajectory_execution)"/>
+            <arg name="fake_execution"                      value="$(arg fake_execution)"/>
+            <arg name="execution_type"                      value="$(arg execution_type)"/>
+        </include>
+
+        <!-- Rviz -->
+        <include file="$(find robot_support)/launch/moveit_rviz.launch">
+            <arg name="rviz_config"     value="-d $(arg rviz_config)" />
+        </include>
+
+</launch>

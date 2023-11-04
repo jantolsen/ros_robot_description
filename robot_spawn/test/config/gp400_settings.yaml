@@ -1,0 +1,25 @@
+# System Settings
+# -------------------------------
+# Setting/Parameter file for the general system
+# (Some parameter needs to match the arguments set in the main launch file)
+
+# ----- General ----- #
+general:
+  simulation:           true      # Simulation mode [enable/disable]
+  global_frame:         "world"   # Global reference frame
+  kinematics: 
+    solver:             "OPW"     # Kinematic-solver [KDL, OPW, TRACIK, LMA, CACHED_KDL, CACHED_TRACIK]
+    search_resolution:  0.005
+    timeout:            0.005
+    attempts:           5
+
+# ----- Robot ----- #    
+robot:    
+  prefix:           "robot_gp400" # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
+  type:             "gp400"       # Robot-type [GP400, GP215, IRB6660] (needs to match parameter in main launch-file)
+  planning_group:                 # Planning-groups for the robot (needs to match parameter in SRDF of robot-type)
+    - manipulator   
+    - eoat    
+  planning_frames:                # Robot-links in planning-scene (Robot-Prefix is added to each link-name)
+    robot_frame:    "base_link"
+    tool_frame:     "tool0"
