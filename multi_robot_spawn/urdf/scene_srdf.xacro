@@ -9,7 +9,6 @@
     <!-- Parameters -->
     <xacro:arg name="robot1_prefix"     default=""/>
     <xacro:arg name="robot1_type"       default="gp400"/>
-    <xacro:arg name="robot1_eoat"       default="false"/>
 
     <!-- Properties -->
     <xacro:property name="robot1_type" value="$(arg robot1_type)"/>
@@ -38,7 +37,6 @@
     <!-- Parameters -->
     <xacro:arg name="robot2_prefix"     default=""/>
     <xacro:arg name="robot2_type"       default="gp400"/>
-    <xacro:arg name="robot2_eoat"       default="false"/>
 
     <!-- Properties -->
     <xacro:property name="robot2_type" value="$(arg robot2_type)"/>

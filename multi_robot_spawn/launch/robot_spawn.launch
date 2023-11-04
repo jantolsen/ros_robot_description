@@ -68,12 +68,9 @@
             <arg name="robot_support_path"  value="$(arg robot2_support_path)" />
         </include>
 
-        <!-- Check for empty robot-namespace. If not add an "_" to the robot-prefix -->
-        <arg if="$(eval robot1_namespace != '')" name="robot1_scene_prefix" value="$(arg robot1_namespace)_" />
-        <arg if="$(eval robot1_namespace == '')" name="robot1_scene_prefix" value="$(arg robot1_namespace)" />
-
-        <arg if="$(eval robot2_namespace != '')" name="robot2_scene_prefix" value="$(arg robot2_namespace)_" />
-        <arg if="$(eval robot2_namespace == '')" name="robot2_scene_prefix" value="$(arg robot2_namespace)" />
+        <!-- Check robot-namespace and add an "_" to the robot-prefix -->
+        <arg name="robot1_scene_prefix" value="$(arg robot1_namespace)_" />
+        <arg name="robot2_scene_prefix" value="$(arg robot2_namespace)_" />
 
         <!-- Load universal robot description format (URDF) -->
         <param name="$(arg robot_description)" 
@@ -87,8 +84,11 @@
 
         <!-- The semantic description that corresponds to the URDF -->
         <param name="$(arg robot_description)_semantic" 
-                command="xacro --inorder '$(arg dollar)$(arg package_path)/urdf/scene_srdf_test2.xacro' 
-                        "/>
+                    command="xacro '$(arg dollar)$(arg package_path)/urdf/scene_srdf.xacro' 
+                        robot1_prefix:=$(arg robot1_scene_prefix)
+                        robot1_type:=$(arg robot1_type)
+                        robot2_prefix:=$(arg robot2_scene_prefix)
+                        robot2_type:=$(arg robot2_type)"/>
 
     <!-- ############################## -->
     <!--            Robot #1            -->
