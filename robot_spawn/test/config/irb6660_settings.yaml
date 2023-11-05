@@ -27,3 +27,7 @@ robot:
   planning_frames:                # Robot-links in planning-scene (Robot-Prefix is added to each link-name)
     robot_frame:    "base_link"
     tool_frame:     "tool0"
+  eoat:
+    # TCP Pose relative to robot interface-plate
+    tcp_position:     [0.000, 0.000, 0.250]   # [x, y, z] [m] 
+    tcp_orientation:  [00.0, 00.0, 00.0]      # [roll, pitch, yaw] [deg]

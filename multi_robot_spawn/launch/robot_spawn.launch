@@ -110,8 +110,10 @@
             <!-- Real/Physical Robot -->
             <group unless="$(arg robot1_simulation)">
                 <!-- Remapping of Joint-State and -Info -->
-                <remap from="$(arg robot_prefix)/$(arg robot1_type)_controller/joint_states" to="controller_joint_states"/>
-                <remap from="$(arg robot_prefix)/$(arg robot1_type)_controller/feedback_states" to="feedback_states"/>
+                <remap from="$(arg robot1_namespace)/$(arg robot1_type)_controller/joint_states" to="controller_joint_states"/>
+                <remap from="$(arg robot1_namespace)/$(arg robot1_type)_controller/feedback_states" to="feedback_states"/>
+                <remap from="$(arg robot1_namespace)/$(arg robot1_type)_controller/joint_info" to="controller_joint_info"/>
+                <remap from="$(arg robot1_namespace)/$(arg robot1_type)_controller/joint_info" to="joint_info"/>
 
                 <!-- Find the related launch file to route to the correct Robot-Controller-Driver -->
                 <include file="$(find robot_support)/launch/robot_controller_driver/$(arg robot1_type)_driver.launch">
@@ -138,8 +140,10 @@
             <!-- Real/Physical Robot -->
             <group unless="$(arg robot2_simulation)">
                 <!-- Remapping of Joint-State and -Info -->
-                <remap from="$(arg robot_prefix)/$(arg robot2_type)_controller/joint_states" to="controller_joint_states"/>
-                <remap from="$(arg robot_prefix)/$(arg robot2_type)_controller/feedback_states" to="feedback_states"/>
+                <remap from="$(arg robot2_namespace)/$(arg robot2_type)_controller/joint_states" to="controller_joint_states"/>
+                <remap from="$(arg robot2_namespace)/$(arg robot2_type)_controller/feedback_states" to="feedback_states"/>
+                <remap from="$(arg robot2_namespace)/$(arg robot2_type)_controller/joint_info" to="controller_joint_info"/>
+                <remap from="$(arg robot2_namespace)/$(arg robot2_type)_controller/joint_info" to="joint_info"/>
 
                 <!-- Find the related launch file to route to the correct Robot-Controller-Driver -->
                 <include file="$(find robot_support)/launch/robot_controller_driver/$(arg robot2_type)_driver.launch">
