@@ -1,0 +1,20 @@
+# End-Effector (EOAT) Settings
+# -------------------------------
+# Description:
+#   Setting/Parameter file for system end-effectors (EOATs)
+#   (Some parameter needs to match the arguments set in the main launch file)
+#
+# Version:
+#   0.1 -   Initial version
+#           [18.11.2023] - Jan T. Olsen
+# -------------------------------
+
+# ----- List of EOATs ----- #
+eoat_list:
+  # EOAT #1 - IRB6660 Brush
+  - id:             1
+    name:           "irb6660_brush"
+    tcp_offset:     # Pose offset of EOAT TCP relative to robot interface-plate
+      position:     [0.000, 0.000, 0.250]   # [x, y, z] [m] 
+      position:     [00.0, 00.0, 00.0]      # [roll, pitch, yaw] [deg]
+    mesh_file_path: "package://robot_support/urdf/eoat/brush/meshes/irb6660_endeffector.stl"
