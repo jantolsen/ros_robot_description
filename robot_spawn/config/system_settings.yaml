@@ -12,7 +12,6 @@
 # ----- General ----- #
 general:
   simulation:       true              # Simulation mode [enable/disable]
-  robot_count:      1                 # Number of robot present in the scene
   global_frame:     world             # Global reference frame
   kinematics:       
     solver:         KDL               # Kinematic-solver [KDL, OPW, TRACIK, LMA, CACHED_KDL, CACHED_TRACIK]
