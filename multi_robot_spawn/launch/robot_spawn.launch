@@ -51,6 +51,7 @@
         <!-- System Settings -->
         <!-- (Load global settings and parameters of system to parameter server) -->
         <rosparam command="load" file="$(arg dollar)$(arg package_path)/config/system_settings.yaml" />
+        <rosparam command="load" file="$(arg dollar)$(arg package_path)/config/eoat_settings.yaml" />
 
         <!-- Robot #1 -->
         <!-- Robot Prefix and Planning Parameters -->

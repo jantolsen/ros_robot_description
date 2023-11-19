@@ -41,6 +41,7 @@
         <!-- System Settings -->
         <!-- (Load global settings and parameters of system to parameter server) -->
         <rosparam command="load" file="$(arg dollar)$(arg package_path)/test/config/irb6660_settings.yaml" />
+        <rosparam command="load" file="$(arg dollar)$(arg package_path)/test/config/eoat_settings.yaml" />
 
         <!-- Robot Prefix and Planning Parameters -->
         <include file="$(find robot_support)/launch/planning_context.launch" >

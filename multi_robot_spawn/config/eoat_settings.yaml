@@ -12,7 +12,7 @@
 # ----- List of EOATs ----- #
 eoat_list:
   # EOAT #1 - IRB6660 Brush
-  - id:             1
+  - id:             001
     name:           irb6660_brush
     tcp_offset:     # Pose offset of EOAT TCP relative to robot interface-plate
       position:     [0.000, 0.000, 0.250]   # [x, y, z] [m] 
