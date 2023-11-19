@@ -22,7 +22,7 @@ general:
 
 # ----- Robot ----- #    
 robot:    
-  prefix:           "robot_irb6660"   # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
+  prefix:           robot_irb6660     # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
   type:             irb6660           # Robot-type [GP400, GP215, IRB6660] (needs to match parameter in main launch-file)
   # Planning-groups for the robot (needs to match parameter in SRDF of robot-type)
   planning_group:   

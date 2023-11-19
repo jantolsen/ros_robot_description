@@ -22,7 +22,7 @@ general:
 
 # ----- Robot #1 ----- #    
 robot_1:    
-  prefix:           "robot1"          # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
+  prefix:           robot1            # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
   type:             irb6660           # Robot-type [GP400, GP215, IRB6660] (needs to match parameter in main launch-file)
   # Planning-groups for the robot (needs to match parameter in SRDF of robot-type)
   planning_group:   
@@ -42,8 +42,8 @@ robot_1:
 
 # ----- Robot #2 ----- #    
 robot_2:    
-  prefix:           "robot2"          # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
-  type:             "gp400"           # Robot-type [GP400, GP215, IRB6660] (needs to match parameter in main launch-file)
+  prefix:           robot2            # Prefix-name of robot (gets added to joint-names, links, etc.) (needs to match parameter in main launch-file)
+  type:             gp400             # Robot-type [GP400, GP215, IRB6660] (needs to match parameter in main launch-file)
   # Planning-groups for the robot (needs to match parameter in SRDF of robot-type)
   planning_group:   
     robot:          manipulator       # Common robot planning-group   

@@ -7,8 +7,8 @@
 eoat:
   # EOAT #1 - IRB6660 Brush
   - id:             1
-    name:           "irb6660_brush"
+    name:           irb6660_brush
     tcp_offset:     # Pose offset of EOAT TCP relative to robot interface-plate
       position:     [0.000, 0.000, 0.250]   # [x, y, z] [m] 
       position:     [00.0, 00.0, 00.0]      # [roll, pitch, yaw] [deg]
-    mesh_file_path: "package://robot_support/urdf/eoat/brush/meshes/irb6660_endeffector.stl"
+    mesh_file_path: package://robot_support/urdf/eoat/brush/meshes/irb6660_endeffector.stl
